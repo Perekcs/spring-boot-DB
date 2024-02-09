@@ -1,20 +1,20 @@
 package org.example.springbootpr1.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+
+@Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "products")
-public class Products {
+public class Product {
     @Id
-    @NotNull
     private long id;
     private String name;
     private double price;
     private String description;
-    @OneToOne
-    private ProductCategory category;
 }

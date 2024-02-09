@@ -1,7 +1,8 @@
 package org.example.springbootpr1;
 
-import org.example.springbootpr1.entity.User;
-import org.example.springbootpr1.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import org.example.springbootpr1.entity.Product;
+import org.example.springbootpr1.manager.Manager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,10 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest
-public class UserRepositoryTest {
+public class ContainerTest {
 
     @Autowired
-    UserRepository userRepository;
+    Manager manager;
 
     @Container
     private static final MySQLContainer<?> mySQL  = new MySQLContainer<>("mysql:8.0");
@@ -30,15 +31,60 @@ public class UserRepositoryTest {
         registry.add("spring.datasource.url", mySQL::getJdbcUrl);
         registry.add("spring.datasource.username", mySQL::getUsername);
         registry.add("spring.datasource.password", mySQL::getPassword);
-        registry.add("spring.jpa.generate-ddl", () -> true);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
     }
 
     @Test
-    void findUserByName(){
-        var count = userRepository.count();
-        User user1 = new User(1, "Sergii", "sergii@mail", "1111");
-        userRepository.save(user1);
-        assertThat(userRepository.count()).isGreaterThan(count);
+    void writeProduct(){
+        Product product1 = new Product();
+        product1.setName("banana");
+        manager.writeProduct(product1);
+        assertThat(manager.readProduct(product1.getId()).getName()).isEqualTo(product1.getName());
+    }
+
+    @Test
+    void mergeProduct(){
+        Product product1 = new Product();
+        product1.setName("tomato");
+        product1.setDescription("red");
+        manager.startTransaction();
+        manager.writeProduct(product1);
+        manager.flushProduct();
+        assertThat(manager.readProduct(product1.getId()).getDescription()).isEqualTo("red");
+        manager.detachProduct(product1);
+        product1.setDescription("yellow");
+        assertThat(manager.readProduct(product1.getId()).getDescription()).isEqualTo("red");
+        manager.mergeProduct(product1);
+        assertThat(manager.readProduct(product1.getId()).getDescription()).isEqualTo("yellow");
+        manager.endTransaction();
+    }
+
+    @Test
+    void refreshProduct(){
+        Product product1 = new Product();
+        product1.setName("tomato");
+        product1.setDescription("red");
+        manager.startTransaction();
+        manager.writeProduct(product1);
+        manager.flushProduct();
+        manager.detachProduct(product1);
+        product1.setDescription("yellow");
+        assertThat(manager.readProduct(product1.getId()).getDescription()).isEqualTo("red");
+        manager.refreshProduct(product1);
+        manager.endTransaction();
+        assertThat(product1.getDescription()).isEqualTo("red");
+    }
+
+    @Test
+    void deleteProduct(){
+        Product product = new Product();
+        product.setName("orange");
+        manager.startTransaction();
+        manager.writeProduct(product);
+        //assertThat(manager.readProduct(product.getId())).isNull();
+        manager.removeProduct(product);
+        assertThat(manager.readProduct(product.getId())).isNull();
+        manager.endTransaction();
     }
 
 }
