@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "products")
 public class Product {
+    @GeneratedValue
     @Id
     private long id;
     private String name;

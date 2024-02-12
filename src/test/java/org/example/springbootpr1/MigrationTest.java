@@ -22,6 +22,4 @@ public class MigrationTest {
         registry.add("spring.datasource.password", mySQL::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
-
-
 }
