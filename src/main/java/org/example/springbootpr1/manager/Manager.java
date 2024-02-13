@@ -2,11 +2,7 @@ package org.example.springbootpr1.manager;
 
 
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceUnit;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.*;
 import org.example.springbootpr1.entity.Product;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +28,13 @@ public class Manager {
                 .setParameter("name", name)
                 .getResultList();
     }
+
+    public List getTotalAgeFromMergedData() {
+        String sqlQuery = "SELECT total_age FROM merged_data";
+        Query query = manager.createNativeQuery(sqlQuery);
+        return  query.getResultList();
+    }
+
 
     public void after(){
         manager.getTransaction().begin();

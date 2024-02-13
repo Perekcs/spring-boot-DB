@@ -1,10 +1,7 @@
 package org.example.springbootpr1;
 
-import jakarta.persistence.EntityManager;
 import org.example.springbootpr1.entity.Product;
 import org.example.springbootpr1.manager.Manager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,14 +11,12 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Testcontainers
 @SpringBootTest
-public class ContainerTest {
+public class EntityManagerTest {
 
 
     @Autowired
@@ -42,8 +37,11 @@ public class ContainerTest {
     void writeProduct(){
         Product product1 = new Product();
         product1.setName("banana");
+        manager.startTransaction();
+        manager.flushProduct();
         manager.writeProduct(product1);
         assertThat(manager.readProduct(product1.getId()).getName()).isEqualTo(product1.getName());
+        manager.endTransaction();
     }
 
     @Test
