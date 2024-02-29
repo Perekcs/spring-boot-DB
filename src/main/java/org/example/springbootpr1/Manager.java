@@ -1,8 +1,9 @@
-package org.example.springbootpr1.manager;
+package org.example.springbootpr1;
 
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import org.example.springbootpr1.entity.Product;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +19,37 @@ public class Manager {
          manager = factory.createEntityManager();
     }
 
-    public List<Product> getAll(){
-        return manager.createQuery("select product from Product product", Product.class).getResultList();
+
+    public String getDescriptionById(Long id){
+        return (String) manager.createQuery("select product.description from Product product where product.id = :id")
+                .setParameter("id", id)
+                .getSingleResult();
     }
 
-    public List<Product> getFromName(String name){
-
-        return manager.createQuery("select product from Product product where product.name = :name", Product.class)
-                .setParameter("name", name)
-                .getResultList();
+    public void deleteProducts(){
+        manager.createQuery("delete from Product")
+                .executeUpdate();
     }
+
+    public void updateProducts(String description, Long id){
+        manager.createQuery("UPDATE Product product SET product.description = :description WHERE product.id = :id")
+                .setParameter("description", description)
+                .setParameter("id", id)
+                .executeUpdate();
+    }
+
+    public long countOfProducts(){
+        return (long) manager.createQuery("SELECT COUNT(*) FROM Product p").getSingleResult();
+    }
+
+    public double averagePrice(){
+        return (double) manager.createQuery("SELECT AVG(p.price) FROM Product p").getSingleResult();
+    }
+
+    public double sumOfProductsPrice(){
+        return (double) manager.createQuery("SELECT SUM(p.price) FROM Product p where p.price >= 100").getSingleResult();
+    }
+
 
     public List getTotalAgeFromMergedData() {
         String sqlQuery = "SELECT total_age FROM merged_data";
@@ -36,11 +58,16 @@ public class Manager {
     }
 
 
-    public void after(){
+    public void cleaner(){
+        if (manager.getTransaction().isActive()){
+            manager.clear();
+            manager.getTransaction().commit();
+        }
         manager.getTransaction().begin();
         manager.clear();
         manager.getTransaction().commit();
     }
+
 
     public void writeProduct(Product product){
         manager.persist(product);

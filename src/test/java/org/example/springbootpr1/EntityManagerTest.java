@@ -1,7 +1,6 @@
 package org.example.springbootpr1;
 
 import org.example.springbootpr1.entity.Product;
-import org.example.springbootpr1.manager.Manager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
